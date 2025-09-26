@@ -12,6 +12,17 @@
   --shadow: 0 2px 12px rgba(0,0,0,.06);
 }
 
+:root {
+  --font-body: "Montserrat", system-ui, sans-serif;
+  --font-heading: "Lubrifont", serif;
+}
+
+html {
+    font-family: var(--font-body);
+}
+
+
+
 /* Header */
 .nav{
   position: sticky;
@@ -41,10 +52,46 @@
 .logoSub{ color:#6b7280; font-size:.72rem; margin-left:6px; }
 
 /* Desktop Links (mittig) */
-.centerLinks{ display:none; gap:22px; }
-.link{ color:var(--muted); text-decoration:none; font-weight:500; padding:8px 0; transition:color .25s; }
-.link:hover{ color:var(--text); }
-.linkActive{ color:var(--active); }
+.centerLinks{ display:none; gap: 3rem; }
+
+/* Desktop-Links */
+.link{
+  position: relative;      /* ← WICHTIG: damit ::after am Link hängt */
+  display: inline-block;   /* ← sorgt dafür, dass die Breite = Textbreite ist */
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 0;
+  transition: color, transform .3s;
+}
+
+.link::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;               /* optional: bottom: -2px; wenn zu nah am Text */
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .3s ease;
+}
+
+.link:hover{ color: var(--text);}
+.link:hover::after{
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.linkActive{
+  color: var(--active);
+}
+.linkActive::after{
+  transform: scaleX(1);
+  background: var(--active);
+}
+
 
 @media (min-width: 990px){
   .centerLinks{ display:flex; }

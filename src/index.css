@@ -1,0 +1,35 @@
+/* Montserrat Regular */
+@font-face {
+  font-family: "Montserrat";
+  src: url("/src/assets/Montserrat/Montserrat-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Montserrat Bold */
+@font-face {
+  font-family: "Montserrat";
+  src: url("/src/assets/Montserrat/Montserrat-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Lubrifont Regular */
+@font-face {
+  font-family: "Lubrifont";
+  src: url("/src/assets/WDXL_Lubrifont_TC/Lubrifont-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Lubrifont Bold */
+@font-face {
+  font-family: "Lubrifont";
+  src: url("/src/assets/WDXL_Lubrifont_TC/Lubrifont-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

@@ -1,106 +1,129 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const { pathname } = useLocation();
 
-  // Overlay-Render-Steuerung für Ein-/Ausblende-Animation
-  const [show, setShow] = useState(false);      // Overlay ist gerendert?
-  const [closing, setClosing] = useState(false); // spielt Close-Animation?
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // beim Routewechsel Menü schließen
-  useEffect(() => {
-    if (show) handleClose();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  const idleTimerRef = useRef(0);
+  const rafRef = useRef(0);
 
-  // Scroll lock, solange Overlay sichtbar ist (auch während Close-Anim)
+  // Menü bei Routewechsel schließen
+  useEffect(() => setMenuOpen(false), [pathname]);
+
+  // Scroll-Lock bei Overlay offen
   useEffect(() => {
-    document.body.style.overflow = show ? "hidden" : "";
+    document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => (document.body.style.overflow = "");
-  }, [show]);
+  }, [menuOpen]);
 
-  const handleOpen = () => {
-    setClosing(false);
-    setShow(true);
-  };
+  // Scroll-Logik: sichtbar während Scroll, ausblenden nach Idle
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafRef.current) return;
+      rafRef.current = requestAnimationFrame(() => {
+        const y = window.scrollY || 0;
 
-  const handleClose = () => {
-    // erst Animation abspielen, danach unmount
-    setClosing(true);
-  };
+        setScrolled(y > 8);        // Schatten/Hintergrund ab 8px
+        setHidden(false);          // sofort einblenden, wenn gescrollt wird
 
-  const onOverlayAnimEnd = () => {
-    if (closing) {
-      setShow(false);
-      setClosing(false);
-    }
-  };
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = setTimeout(() => {
+          if (window.scrollY > 80) setHidden(true); // nach 800ms Idle ausblenden
+        }, 800);
+
+        rafRef.current = 0;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, []);
 
   return (
-    <header className={styles.nav}>
-      <div className={styles.inner}>
-        {/* Logo links */}
-        <Link to="/" className={styles.logo}>
-          <span className={styles.logoMark} aria-hidden="true" />
-        </Link>
+    <>
+      <header
+        className={[
+          styles.nav,
+          hidden ? styles.navHidden : styles.navShown,
+          scrolled ? styles.navScrolled : "",
+        ].join(" ")}
+      >
+        <div className={styles.inner}>
+          {/* Logo */}
+          <Link to="/" className={styles.logo} aria-label="Startseite">
+            <span className={styles.logoMark} aria-hidden="true" />
+          </Link>
 
-        {/* Desktop-Links mittig */}
-        <nav className={styles.centerLinks} aria-label="Hauptnavigation">
-          {[
-            { to: "/", label: "Home" },
-            { to: "/kandidaten", label: "Für Kandidaten" },
-            { to: "/unternehmen", label: "Für Unternehmen" },
-            { to: "/portfolio", label: "Leistungsportfolio" },
-            { to: "/ueber-uns", label: "Über uns" },
-            { to: "/kontakt", label: "Kontakt" },
-          ].map((i) => (
-            <NavLink
-              key={i.to}
-              to={i.to}
-              className={({ isActive }) =>
-                `${styles.link} ${isActive ? styles.linkActive : ""}`
-              }
-            >
-              {i.label}
-            </NavLink>
-          ))}
-        </nav>
+          {/* Desktop Links */}
+          <nav className={styles.centerLinks} aria-label="Hauptnavigation">
+            {[
+              { to: "/", label: "Home" },
+              { to: "/kandidaten", label: "Für Kandidaten" },
+              { to: "/unternehmen", label: "Für Unternehmen" },
+              { to: "/portfolio", label: "Leistungsportfolio" },
+              { to: "/ueber-uns", label: "Über uns" },
+              { to: "/kontakt", label: "Kontakt" },
+            ].map((i) => (
+              <NavLink
+                key={i.to}
+                to={i.to}
+                className={({ isActive }) =>
+                  `${styles.link} ${isActive ? styles.linkActive : ""}`
+                }
+              >
+                {i.label}
+              </NavLink>
+            ))}
+          </nav>
 
-        {/* Burger rechts (nur mobil sichtbar, via CSS) */}
-        <button
-          className={styles.burgerBtn}
-          aria-label="Menü öffnen"
-          aria-haspopup="dialog"
-          aria-expanded={show && !closing}
-          onClick={handleOpen}
-        >
-          <span className={styles.burgerBar} />
-          <span className={styles.burgerBar} />
-          <span className={styles.burgerBar} />
-        </button>
-      </div>
+          {/* Burger mobil */}
+          <button
+            className={styles.burgerBtn}
+            aria-label="Menü öffnen"
+            onClick={() => setMenuOpen(true)}
+          >
+            <span className={styles.burgerBar} />
+            <span className={styles.burgerBar} />
+            <span className={styles.burgerBar} />
+          </button>
+        </div>
+      </header>
 
-      {/* Overlay-Menü (bleibt beim Schließen während der Animation gemountet) */}
-      {show && (
+      {/* Spacer, damit Content nicht überlappt */}
+      <div className={styles.navSpacer} />
+
+      {/* Overlay Menü mobil */}
+      {menuOpen && (
         <div
-          className={`${styles.overlay} ${closing ? styles.slideOut : styles.slideIn}`}
+          className={`${styles.overlay} ${styles.slideIn}`}
           role="dialog"
           aria-modal="true"
-          aria-label="Mobiles Menü"
-          onAnimationEnd={onOverlayAnimEnd}
         >
-          {/* Close Button */}
           <button
             className={styles.closeBtn}
             aria-label="Menü schließen"
-            onClick={handleClose}
+            onClick={() => {
+              const el = document.querySelector(`.${styles.overlay}`);
+              if (!el) return setMenuOpen(false);
+              el.classList.remove(styles.slideIn);
+              el.classList.add(styles.slideOut);
+              el.addEventListener("animationend", () => setMenuOpen(false), {
+                once: true,
+              });
+            }}
           >
             <span className={styles.closeIcon} aria-hidden="true" />
           </button>
 
-          {/* Suchfeld (wie in deinem Screenshot) */}
           <div className={styles.searchWrap}>
             <input
               className={styles.searchInput}
@@ -111,7 +134,6 @@ export default function Navbar() {
             <span className={styles.searchIcon} aria-hidden="true">🔍</span>
           </div>
 
-          {/* Linkliste */}
           <nav className={styles.mobileLinks} aria-label="Mobiles Menü">
             {[
               { to: "/", label: "Home" },
@@ -136,6 +158,6 @@ export default function Navbar() {
           </nav>
         </div>
       )}
-    </header>
+    </>
   );
 }

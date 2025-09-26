@@ -1,0 +1,123 @@
+:root{
+  --nav-h: 64px;
+  --text: #0f172a;
+  --muted: #475569;
+  --active: #0f172a;
+
+  --overlay-bg: #0e2a55;   /* dunkelblau wie Screenshot */
+  --overlay-text: #ffffff;
+  --close-bg: #12b3ae;     /* türkis runder Button */
+  --border: 1px solid #e5e7eb;
+
+  --shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+/* Header */
+.nav{
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background:#fff;
+  border-bottom: var(--border);
+  box-shadow: var(--shadow);
+}
+.inner{
+  height: var(--nav-h);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo */
+.logo{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+.logoMark{ width:22px; height:22px; border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #8b5cf6, #0ea5e9);
+}
+.logoText{ color:#0f172a; font-weight:800; letter-spacing:.2px; }
+.logoSub{ color:#6b7280; font-size:.72rem; margin-left:6px; }
+
+/* Desktop Links (mittig) */
+.centerLinks{ display:none; gap:22px; }
+.link{ color:var(--muted); text-decoration:none; font-weight:500; padding:8px 0; transition:color .25s; }
+.link:hover{ color:var(--text); }
+.linkActive{ color:var(--active); }
+
+@media (min-width: 990px){
+  .centerLinks{ display:flex; }
+}
+
+/* Burger (nur mobil sichtbar) */
+.burgerBtn{
+  background:none; border:none; width:44px; height:44px;
+  display:none; place-items:center; cursor:pointer;
+}
+.burgerBar{ width:22px; height:2px; background:#0f172a; display:block; }
+.burgerBar + .burgerBar{ margin-top:5px; }
+
+@media (max-width: 989px){
+  .burgerBtn{ display:grid; }       /* 👉 nur unter 990px sichtbar */
+}
+
+/* Overlay */
+.overlay{
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg);
+  color: var(--overlay-text);
+  z-index: 999;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  padding: 16px;
+  will-change: transform, opacity;
+}
+.slideIn{ animation: overlayIn .28s ease both; }
+.slideOut{ animation: overlayOut .28s ease both; }
+
+@keyframes overlayIn{
+  from{ transform: translateX(100%); opacity: .6; }
+  to  { transform: translateX(0);    opacity: 1;  }
+}
+@keyframes overlayOut{
+  from{ transform: translateX(0);    opacity: 1;  }
+  to  { transform: translateX(100%); opacity: .6; }
+}
+
+/* Close-Button (rund, rechts oben) */
+.closeBtn{
+  position:absolute; top:18px; right:18px;
+  width:40px; height:40px; border-radius:999px;
+  border:none; background:var(--close-bg); color:#fff;
+  display:grid; place-items:center; cursor:pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  transition: transform .15s ease;
+}
+.closeBtn:active{ transform: scale(.96); }
+
+.closeIcon, .closeIcon::before{
+  content:""; width:18px; height:2px; background:#fff; display:block;
+  transform: rotate(45deg);
+}
+.closeIcon::before{ transform: rotate(-90deg); }
+
+/* Suche */
+.searchWrap{ margin-top:56px; display:flex; align-items:center; gap:10px; }
+.searchInput{
+  flex:1; height:42px; border-radius:999px; border:1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.08); color:#fff; padding:0 16px; outline:none;
+}
+.searchInput::placeholder{ color: rgba(255,255,255,.85); }
+.searchIcon{ margin-left:-34px; pointer-events:none; opacity:.9; }
+
+/* Mobile Linkliste */
+.mobileLinks{ margin-top:18px; display:flex; flex-direction:column; gap:18px; }
+.mobileLink{ color:#fff; text-decoration:none; font-weight:700; letter-spacing:.2px; }
+.mobileLinkActive{ text-decoration: underline; }
+
+/* Overlay nur mobil (optional) */
+@media (min-width: 990px){
+  .overlay{ display:none; }
+}
